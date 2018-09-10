@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -14,6 +15,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Vlc.DotNet.Core;
+using Vlc.DotNet.Core.Interops.Signatures;
 using Vlc.DotNet.Wpf;
 
 namespace Atlas.Vlc.Player
@@ -23,20 +26,38 @@ namespace Atlas.Vlc.Player
     /// </summary>
     public partial class AtlasPlayer
     {
-        private VlcVideoSourceProvider sourceProvider;
+       
         public AtlasPlayer()
         {
             InitializeComponent();
             initImgVlc();
         }
-
+        private VlcVideoSourceProvider sourceProvider;
+        private string _currentFile = string.Empty;
+        private volatile bool m_isDrag;
+        private void DMSkinSimpleWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.videoTimeLine.AddHandler(Thumb.DragCompletedEvent, new DragCompletedEventHandler(this.sldPosition_DragCompleted));
+            this.videoTimeLine.AddHandler(Thumb.DragStartedEvent, new DragStartedEventHandler(this.sldPosition_DragStarted));
+            this.sldVolume.ValueChanged +=new RoutedPropertyChangedEventHandler<double>(sldVolume_ValueChanged);
+            //控件绑定
+            this.myVlcPlayer.SetBinding(System.Windows.Controls.Image.SourceProperty,
+                new Binding(nameof(VlcVideoSourceProvider.VideoSource)) { Source = sourceProvider });
+            //播放时间事件
+            this.sourceProvider.MediaPlayer.TimeChanged += 
+                new EventHandler<VlcMediaPlayerTimeChangedEventArgs>(Events_TimeChanged);
+            //播放进度
+            this.sourceProvider.MediaPlayer.PositionChanged += 
+                new EventHandler<VlcMediaPlayerPositionChangedEventArgs>(Events_PlayerPositionChanged);
+            //结束
+            this.sourceProvider.MediaPlayer.EndReached +=
+                new EventHandler<VlcMediaPlayerEndReachedEventArgs>(Events_PlayerEndChanged);
+        }
         /// <summary>
         /// 使用image做载体
         /// </summary>
         private void initImgVlc()
         {
-            file.Text = @"d:\video\test.avi";
-
 
             var currentAssembly = Assembly.GetEntryAssembly();
             var currentDirectory = new FileInfo(currentAssembly.Location).DirectoryName;
@@ -55,7 +76,7 @@ namespace Atlas.Vlc.Player
         /// </summary>
         private void InitVlc()
         {
-            file.Text = @"d:\video\test.avi";
+          
             var currentAssembly = Assembly.GetEntryAssembly();
             var currentDirectory = new FileInfo(currentAssembly.Location).DirectoryName;
             if (currentDirectory == null)
@@ -66,24 +87,124 @@ namespace Atlas.Vlc.Player
 
         private void btn_play_click(object sender, RoutedEventArgs e)
         {
-            var txt = file.Text;
-            if (string.IsNullOrEmpty(txt))
+
+            System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)//注意，此处一定要手动引入System.Window.Forms空间，否则你如果使用默认的DialogResult会发现没有OK属性
             {
-                MessageBox.Show("请选择文件");
-                return;
+                _currentFile = openFileDialog.FileName;
+                //Image做载体播放
 
+                FileInfo fileInfo=new FileInfo(_currentFile);
+                this.sourceProvider.MediaPlayer.SetMedia(fileInfo);
+                this.sourceProvider.MediaPlayer.LengthChanged +=new EventHandler<VlcMediaPlayerLengthChangedEventArgs>(Events_LengthChanged);
+                this.sourceProvider.MediaPlayer.Play();
+
+                PlayerTitle.Text = fileInfo.Name;
+               
+                //this.BackgroundVideo.SetBinding(System.Windows.Controls.Image.SourceProperty,
+                //    new Binding(nameof(VlcVideoSourceProvider.VideoSource)) { Source = sourceProvider });
+
+
+                //控件做载体播放
+              
+               // this.myVlcPlayer.SourceProvider.MediaPlayer.Play(fileInfo);
             }
-            //Image做载体播放
-            this.sourceProvider.MediaPlayer.Play(new FileInfo(txt));
-            this.myVlcPlayer.SetBinding(System.Windows.Controls.Image.SourceProperty,
-               new Binding(nameof(VlcVideoSourceProvider.VideoSource)) { Source = sourceProvider });
+           
 
-            //this.BackgroundVideo.SetBinding(System.Windows.Controls.Image.SourceProperty,
-            //    new Binding(nameof(VlcVideoSourceProvider.VideoSource)) { Source = sourceProvider });
+        }
+        /// <summary>
+        /// 时间变化
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void Events_LengthChanged(object sender, VlcMediaPlayerLengthChangedEventArgs e)
+        {
+            this.Dispatcher.BeginInvoke(new Action(delegate
+            {
+               
+             long totalMs = this.sourceProvider.MediaPlayer.Length;
+                labDuration.Content= TimeSpan.FromMilliseconds(totalMs).ToString().Substring(0, 8);
+             //   labTime.Content=""
+            }));
+        }
+        /// <summary>
+        /// 时间变化
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void Events_TimeChanged(object sender, VlcMediaPlayerTimeChangedEventArgs e)
+        {
+            this.Dispatcher.BeginInvoke(new Action(delegate
+            {
+                labTime.Content = TimeSpan.FromMilliseconds(e.NewTime).ToString().Substring(0, 8);
+            }));
+        }
+        /// <summary>
+        /// 播放进度
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void Events_PlayerPositionChanged(object sender,VlcMediaPlayerPositionChangedEventArgs e)
+        {
+            this.Dispatcher.BeginInvoke(new Action(delegate
+            {
+                if (!m_isDrag)
+                {
+                    videoTimeLine.Value = (double)e.NewPosition;
+                }
+            }));
+        }
+        /// <summary>
+        /// 播放结束
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void Events_PlayerEndChanged(object sender, VlcMediaPlayerEndReachedEventArgs e)
+        {
+            this.Dispatcher.BeginInvoke(new Action(delegate
+            {
+                InitControls();
+            }));
+        }
 
+        private void InitControls()
+        {
+            videoTimeLine.Value = 0;
+            labTime.Content = "00:00:00";
+            labDuration.Content = "00:00:00";
+        }
+        /// <summary>
+        /// 获取总时长
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void Events_DurationChanged(object sender, VlcMediaDurationChangedEventArgs e)
+        {
+            this.Dispatcher.BeginInvoke(new Action(delegate
+            {
+                labDuration.Content = TimeSpan.FromMilliseconds(e.NewDuration).ToString().Substring(0, 8);
+            }));
+        }
 
-            //控件做载体播放
-            // this.myVlcPlayer.SourceProvider.MediaPlayer.Play(new FileInfo(txt));
+        private void sldPosition_DragCompleted(object sender, DragCompletedEventArgs e)
+        {
+            this.sourceProvider.MediaPlayer.Position = (float)videoTimeLine.Value;
+            m_isDrag = false;
+        }
+
+        private void sldPosition_DragStarted(object sender, DragStartedEventArgs e)
+        {
+            m_isDrag = true;
+        }
+
+        private void sldVolume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (this.sourceProvider.MediaPlayer != null)
+            {
+                this.sourceProvider.MediaPlayer.Audio.Volume= (int)e.NewValue;
+               
+                //this.sourceProvider.MediaPlayer.GetMedia() .Audio = (int)e.NewValue;
+            }
         }
     }
 }
