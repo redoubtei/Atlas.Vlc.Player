@@ -113,5 +113,16 @@
       <Name>DMSkin.WPF</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="imgs\2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="imgs\left.jpg" />
+    <Resource Include="imgs\right.jpg" />
+    <Resource Include="imgs\start.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="imgs\open.jpg" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -85,6 +85,11 @@ namespace Atlas.Vlc.Player
             //this.myVlcPlayer.SourceProvider.CreatePlayer(libDirectory/* pass your player parameters here */);
         }
 
+        /// <summary>
+        /// 本地视频
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btn_play_click(object sender, RoutedEventArgs e)
         {
 
@@ -111,6 +116,71 @@ namespace Atlas.Vlc.Player
             }
            
 
+        }
+
+        private void btn_play_stream(object sender, RoutedEventArgs e)
+        {
+            var url = "rtsp://123.147.113.84:554/04000001/01000000004000000000000000000193?AuthInfo=xxx&userid=";
+
+            this.sourceProvider.MediaPlayer.Play(new Uri(url));
+        }
+        /// <summary>
+        /// 开始
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_play_start(object sender, RoutedEventArgs e)
+        {
+            if (this.sourceProvider.MediaPlayer.IsPlaying())
+            {
+                this.sourceProvider.MediaPlayer.Pause();
+            }
+            else if(this.sourceProvider.MediaPlayer.IsPausable())
+            {
+                this.sourceProvider.MediaPlayer.Play();
+            }
+        }
+        /// <summary>
+        /// 开始
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_play_left(object sender, RoutedEventArgs e)
+        {
+
+        }
+        /// <summary>
+        /// 开始
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_play_right(object sender, RoutedEventArgs e)
+        {
+
+        }
+        /// <summary>
+        /// 开始
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_play_stop(object sender, RoutedEventArgs e)
+        {
+            
+            try
+            {
+                this.Dispatcher.BeginInvoke(new Action(delegate
+                    {
+                      
+                    this.sourceProvider?.MediaPlayer.Stop(); 
+                    
+                }
+                ));
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
         /// <summary>
         /// 时间变化

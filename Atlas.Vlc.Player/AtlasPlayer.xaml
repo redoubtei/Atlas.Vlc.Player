@@ -80,44 +80,67 @@
                         DMSystemButtonHoverForeground="White"
                         DMSystemButtonSize="30" />
                     <controls:DMSystemCloseButton
-                        DMSystemButtonForeground="Red"
-                        DMSystemButtonHoverForeground="Red"
+                        DMSystemButtonForeground="White"
+                        DMSystemButtonHoverForeground="White"
                         DMSystemButtonSize="30" />
                 </WrapPanel>
             </Grid>
         </Grid>
         <Grid Background="Black" Margin="0,30,0,0">
-            <!--<Grid.ColumnDefinitions>
-                <ColumnDefinition Width="337*"/>
-                <ColumnDefinition Width="159*"/>
-            </Grid.ColumnDefinitions>-->
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"></RowDefinition>
                 <RowDefinition Height="20"></RowDefinition>
                 <RowDefinition Height="40"></RowDefinition>
             </Grid.RowDefinitions>
-            <!--<Grid.Background>
-                <SolidColorBrush Color="Black"></SolidColorBrush>
-            </Grid.Background>-->
             <!--<wpf1:VlcControl Grid.Row="0" x:Name="myVlcPlayer" Background="Black"/>-->
             <Image x:Name="myVlcPlayer" Stretch="Uniform" Grid.ColumnSpan="2"></Image>
-            <!--<TextBox Grid.Row="1" x:Name="file" Width="500"></TextBox>-->
             <Slider x:Name="videoTimeLine" Minimum="0" Maximum="1" Padding="1,1,1,1"  Grid.Row="1" />
-            <!--<StackPanel Orientation="Horizontal" Grid.Row="2" Background="DarkSlateGray">
-                
-            </StackPanel>-->
-            <controls:DMButton Content="播放" Width="120" Height="30" Margin="5" 
-                               Background="#FF1E9FFF"
+            <StackPanel Orientation="Horizontal" Grid.Row="2" Background="DarkSlateGray">
+                <controls:DMButton Click="btn_play_start" Background="DarkSlateGray" BorderThickness="0">
+                    <Rectangle HorizontalAlignment="Right" Width="54" Height="20">
+                        <Rectangle.Fill>
+                            <ImageBrush   ImageSource="imgs\start.jpg" ></ImageBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </controls:DMButton>
+                <controls:DMButton Click="btn_play_stop" Background="DarkSlateGray" BorderThickness="0">
+                    <Rectangle HorizontalAlignment="Right" Width="54" Height="20">
+                        <Rectangle.Fill>
+                            <ImageBrush   ImageSource="imgs\2.png" ></ImageBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </controls:DMButton>
+                <controls:DMButton Click="btn_play_left" Background="DarkSlateGray" BorderThickness="0">
+                    <Rectangle HorizontalAlignment="Right" Width="54" Height="20">
+                        <Rectangle.Fill>
+                            <ImageBrush   ImageSource="imgs\left.jpg" ></ImageBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </controls:DMButton>
+                <controls:DMButton Click="btn_play_right" Background="DarkSlateGray" BorderThickness="0">
+                    <Rectangle HorizontalAlignment="Right" Width="54" Height="20">
+                        <Rectangle.Fill>
+                            <ImageBrush   ImageSource="imgs\right.jpg" ></ImageBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </controls:DMButton>
+                <controls:DMButton Background="DarkSlateGray"
                                BorderThickness="0"
-                               Foreground="White"
                                HorizontalAlignment="Left"
-                               Click="btn_play_click" Grid.Row="2">
-            </controls:DMButton>
-            <Label Height="30"  Name="labTime" Margin="140,0,0,5" HorizontalAlignment="Left" Width="60" Grid.Row="2" Background="DarkSlateGray">00:00:00</Label>
-            <Label Height="30" Width="10" HorizontalAlignment="Left" Grid.Row="2" Margin="205,0,0,0" Background="DarkSlateGray">/</Label>
-            <Label Height="30" Name="labDuration" HorizontalAlignment="Left" Width="62" Grid.Row="2" Background="DarkSlateGray" Margin="220,0,0,5">00:00:00</Label>
+                               Click="btn_play_click">
+                    <Rectangle HorizontalAlignment="Right" Width="60" Height="20">
+                        <Rectangle.Fill>
+                            <ImageBrush   ImageSource="imgs\open.jpg" ></ImageBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </controls:DMButton>
+            <Label Height="30"  Name="labTime"  HorizontalAlignment="Left" Width="60" >00:00:00</Label>
+            <Label Height="30" Width="20" HorizontalAlignment="Left">/</Label>
+            <Label Height="30" Name="labDuration" HorizontalAlignment="Left" Width="62">00:00:00</Label>
 
-            <Slider Height="22" HorizontalAlignment="Right" Name="sldVolume"  Width="100"  Value="50" Maximum="100" Grid.Row="2" Background="DarkSlateGray" Margin="50,0,60,0"/>
+            <Slider Height="22" HorizontalAlignment="Right" Name="sldVolume"  Width="100"  Value="50" Maximum="100"  Margin="300,0,60,0"/>
+            </StackPanel>
+          
         </Grid>
     </Grid>
 </wpf:DMSkinSimpleWindow>
